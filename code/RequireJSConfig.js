@@ -11,6 +11,7 @@ require.config({
 		"bootstrap"		: "libs/bootstrap/js/bootstrap.min",
 		"scrollto"		: "libs/scrollto/jquery.scrollTo-1.4.3.1-min",
 		"garlic"		: "libs/garlic/garlic.min",
+		"kelpjsonview"	: "libs/kelpjsonview/kelpjsonview",
 		"templateutils"	: "com/utils/TemplateUtils",
 
 	},

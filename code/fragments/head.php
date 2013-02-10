@@ -8,6 +8,7 @@
 	<!-- Le styles -->
 	<link href="../libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 	<link href="../libs/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+	<link href="../libs/kelpjsonview/kelpjsonview.css" rel="stylesheet">
 	<link href="../assets/styles.css" rel="stylesheet">
 
 	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
