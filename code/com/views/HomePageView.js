@@ -4,9 +4,11 @@ define([
 		"backbone",
 		"garlic",
 		"kelpjsonview",
+		"templateutils",
 		"com/views/PageView",
+		"com/models/Constants",
 	
-	], function( $, Backbone, Garlic, KelpJSONView, PageView ) {
+	], function( $, Backbone, Garlic, KelpJSONView, TemplateUtils, PageView, Constants ) {
 		
     // Extends PagView class
     var HomePageView = PageView.extend({
@@ -57,6 +59,29 @@ define([
         		}
         	});
         	
+        	//click handler for the url button
+        	var urlBtn = this.$el.find("#jsonEditControls #urlBtn");
+        	$(urlBtn).off().on("click", function(){
+        		if(!$(this).hasClass("btn-inverse")){
+        			self._toggleURLField();
+        		}
+        	});
+        	
+        	//click handler for the fetch json from url button
+        	var getJSONBtn = this.$el.find("#getJSONBtn");
+        	$(getJSONBtn).off().on("click", function(){
+        		var url = self.$el.find("#jsonURL").val();
+        		self._getJSONFromURL(url);
+        	});
+        	
+        	//select all url text on focus
+        	var urlField = this.$el.find("#jsonURL");
+        	$(urlField).off().on("focus", function(){
+        		$(this).select();
+        	}).on("mouseup", function(){
+        		return false;
+        	});
+        	
         	//use localstorage to persist user json input
         	var jsonForm = this.$el.find("#jsonForm");
         	$(jsonForm).garlic();
@@ -65,14 +90,85 @@ define([
         },
         
         /**
-         * show the json field
+         * get json from a url
+         * @param url, string
+         */
+        _getJSONFromURL: function(url) 
+        {
+        	if(url.indexOf("http") == -1){
+        		url = "http://" + url;
+        	}
+        	
+        	var self = this;
+        	this._showJSONSpinner();
+        	this._hideJSONAlert();
+        	
+        	//setup the global JSONP handler
+        	window["jsonpCallback"] = function(data){
+        		console.log("JSON Received:");
+				console.log(data);
+				self._showJSONEditView(JSON.stringify(data));
+				self._hideJSONSpinner();
+				self._showJSONFeedbackMessage(Constants.ALERT_JSON_FETCH_SUCCESS, Constants.ALERT_TYPE_SUCCESS);
+				
+				//trigger click to store json
+				self.$el.find("#jsonEdit").trigger("change");
+				
+				//remove handler
+				delete window["jsonpCallback"];
+        	};
+        	
+        	//handler if request returns with error
+        	var onError = function(jqXHR, textStatus)
+        	{
+        		var response = jqXHR.responseText;
+				self._showJSONEditView(response);
+				self._hideJSONSpinner();
+				self._showJSONFeedbackMessage(Constants.ALERT_JSON_REQUEST_FAILED, Constants.ALERT_TYPE_ERROR);
+				throw new Error("HomePageView._getJSONFromURL() error: " + textStatus);
+        	};
+        	
+        	$.ajax({
+				type: "GET",
+				url: url,
+				timeout: 2000,
+				cache: false,
+				dataType: "jsonp",
+				jsonpCallback: "jsonpCallback",
+				complete: function(jqXHR, textStatus) {
+			        if (jqXHR.status == 0) {
+			        	onError(jqXHR, textStatus);
+			        }
+			    },
+				error: function(jqXHR, textStatus, errorThrown){
+					onError(jqXHR, textStatus);
+				}
+			});	
+        },
+        
+        /**
+         * toggle show/hide of the url field
          * @param none
          */
-        _showJSONEditView: function()
+        _toggleURLField: function()
+        {
+        	var urlField = this.$el.find("#jsonURLContainer");
+        	$(urlField).slideToggle("fast");
+        },
+        
+        /**
+         * show the json field
+         * @param jsonString, string [optiona], if set, populate the textarea with the string
+         */
+        _showJSONEditView: function(jsonString)
         {
         	var jsonPreviewView = this.$el.find("#jsonPreview").hide();
 			var jsonEditView = this.$el.find("#jsonEdit").show();
 			this._selectJSONButton(0);
+			
+			if(jsonString){
+				$(jsonEditView).val(jsonString);
+			}
         },
         
         /**
@@ -82,7 +178,7 @@ define([
         _showJSONPreviewView: function()
         {
         	var self = this;
-        	var jsonPreviewView = this.$el.find("#jsonPreview").html("").hide();
+        	var jsonPreviewView = this.$el.find("#jsonPreview").html("").show();
 			var jsonEditView = this.$el.find("#jsonEdit").hide();
 			
 			var json = this._validateCurrentJSON();
@@ -122,7 +218,7 @@ define([
          */
         _validateCurrentJSON: function()
         {
-        	var errorAlert = this.$el.find("#jsonErrorAlert").hide();
+        	this._hideJSONAlert();
         	var jsonEditView = this.$el.find("#jsonEdit");
 			var jsonString = $(jsonEditView).val();
 			var json;
@@ -132,13 +228,39 @@ define([
     			console.log("JSON is valid:");
     			console.log(json);
     		} catch(e){
-    			$(errorAlert).fadeIn("fast");
+    			jsonString.length == 0 ? 
+    				this._showJSONFeedbackMessage(Constants.ALERT_JSON_NONE, Constants.ALERT_TYPE_WARN) : 
+    				this._showJSONFeedbackMessage(Constants.ALERT_JSON_MALFORMED, Constants.ALERT_TYPE_ERROR);
     			console.log(e);
     			console.log("JSON input:");
     			console.log(jsonString);
     		}
     		
     		return json;
+        },
+        
+        /**
+         * show json feedback message
+         * @param message, string, can be html
+         * @param type, string constant
+         */
+        _showJSONFeedbackMessage: function(message, type)
+        {
+        	var jsonAlert = this.$el.find("#jsonAlert").html("");
+        	var params = { html: message, type: type };
+        	TemplateUtils.getTemplate("alert", params, function(html){
+        		$(jsonAlert).html(html).fadeIn("fast");
+        	});
+        },
+        
+        /**
+         * hide json alert
+         * @param none
+         */
+        _hideJSONAlert: function()
+        {
+        	var jsonAlert = this.$el.find("#jsonAlert");
+        	$(jsonAlert).fadeOut("fast");
         },
         
         /**

@@ -24,7 +24,7 @@
 			    		<i class="icon-edit"></i> Edit
 					</button>
 					<button id="previewBtn" class="btn btn-small" type="button">
-			    		<i class="icon-eye-open"></i> Preview
+			    		<i class="icon-indent-left"></i> Formatted
 					</button>
 					<button id="urlBtn" class="btn btn-small" type="button">
 			    		<i class="icon-globe"></i> URL
@@ -35,15 +35,19 @@
 
         <form id="jsonForm" method="POST">
 	        <div class="well well-large">
+	        	<div id="jsonURLContainer" class="pull-left">
+	        		<div class="input-prepend input-append">
+	        			<span class="add-on"><i class="icon-globe"></i></span>
+	        			<input id="jsonURL" class="span7" type="text" placeholder="www.url.com"/>
+	        			<button id="getJSONBtn" class="btn" type="button">Fetch!</button>
+	    			</div>
+	        	</div>
 	        	<div id="jsonPreview"></div>
-	        	<textarea id="jsonEdit"></textarea>
+	        	<textarea id="jsonEdit" placeholder="{'hey' : 'JSON goes here'}"></textarea>
+	        	<div id="jsonAlert"></div>
+		        <a id="createBtn" class="btn btn-large btn-success btn-block" href="javascript: void(0);">Cook me up some classes!</a>
 	        </div>
         </form>
-        
-        <div id="jsonErrorAlert" class="alert alert-error">
-    		<b>Oh snap!</b> Your JSON is malformed, fix it.
-		</div>
-        <a id="createBtn" class="btn btn-large btn-success btn-block" href="javascript: void(0);">Cook me up some classes!</a>
       </div>
 
       <hr>

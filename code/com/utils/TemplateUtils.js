@@ -19,14 +19,25 @@ define([
 		$.ajax({
 			type: "GET",
 			url: Constants.FOLDER_TEMPLATES + template + Constants.EXTENSION_TEMPLATES,
-			cache: false,
+			async: true,
+			cache: true,
 			success: function(data){
+				
+				//dont escape params with the key "html"
+				Handlebars.registerHelper('html', function() {
+					return new Handlebars.SafeString(this.html);
+				});
+				
 				var template = Handlebars.compile(data);
 				var html = template(params);
 				
 				if(onTemplateHandler){
 					onTemplateHandler(html);
 				}
+				
+			},
+			error: function(jqXHR, textStatus, errorThrown){
+				throw new Error("TemplateUtils.getTemplate() error: " + textStatus);
 			}
 		});	
 	}

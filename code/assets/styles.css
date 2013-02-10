@@ -39,6 +39,7 @@ body {
 	height: 200px;
 	display: none;
 	padding-left: 10px;
+	margin-bottom: 15px;
 }
 
 .jumbotron h3 {
@@ -48,6 +49,10 @@ body {
 .jumbotron #jsonEditControls {
 	margin: 25px 0px 10px 0px;
 }
+
+.jumbotron #jsonURLContainer {
+	display: none;
+} 
 
 .jumbotron .spinner {
 	margin-right: 10px;
@@ -61,8 +66,9 @@ body {
 	margin-top: 28px;
 }
 
-.alert {
+#jsonAlert {
 	display: none;
+	margin-bottom: 10px;
 }
 
 .spinner {
@@ -83,6 +89,9 @@ body {
 	cursor: default;
 }
 
+textarea {
+	resize: vertical;
+}
 
 
 
