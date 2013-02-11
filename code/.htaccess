@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /url.com/
+	RedirectMatch permanent ^/url.com/www/home.php /url.com/www/
+	RewriteRule ^([a-z]+)/([a-z\-]+)$ /url.com/$1/$2.php [L]
+</IfModule>
