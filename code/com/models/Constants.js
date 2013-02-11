@@ -22,7 +22,10 @@ define([
 		ALERT_JSON_MALFORMED : "<b>Oh snap!</b> Your JSON is malformed, fix it plz.",
 		ALERT_JSON_REQUEST_FAILED : "<b>Oh snap!</b> Your JSON requst failed for some reason.",
 		ALERT_JSON_NONE : "Put some JSON to make delicious JS classes...",
-		ALERT_JSON_FETCH_SUCCESS : "<b>Success!</b> We got your sexy JSON. ;)",
+		ALERT_JSON_FETCH_SUCCESS : "It's <b>GOOD</b>! We got your sexy JSON.",
+		
+		/**** json parser constants ****/
+		JSON_PARSER_ROOT_CLASS : "Model",
 
 	});
 

@@ -7,8 +7,9 @@ define([
 		"templateutils",
 		"com/views/PageView",
 		"com/models/Constants",
+		"com/utils/JSONClassParser",
 	
-	], function( $, Backbone, Garlic, KelpJSONView, TemplateUtils, PageView, Constants ) {
+	], function( $, Backbone, Garlic, KelpJSONView, TemplateUtils, PageView, Constants, JSONClassParser ) {
 		
     // Extends PagView class
     var HomePageView = PageView.extend({
@@ -36,7 +37,9 @@ define([
         	$(createBtn).off().on("click", function(){
         		var json = self._validateCurrentJSON();
         		if(json){
-        			console.log("Go!");
+        			var classes = JSONClassParser.getClasses(json);
+        			console.log("Classes found:");
+        			console.log(classes);
         		}
         		else{
         			console.log("invalid json");
