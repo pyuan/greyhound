@@ -40,6 +40,14 @@ define([
         			var classes = JSONClassParser.getClasses(json);
         			console.log("Classes found:");
         			console.log(classes);
+        			
+        			//TODO: temporary code to show generated classes
+        			var classesArray = [];
+        			for(var className in classes){
+        				classesArray.push(className);
+        			}
+        			var message = "Classes from JSON: " + classesArray.join(", ");
+        			self._showJSONFeedbackMessage(message, Constants.ALERT_TYPE_SUCCESS);
         		}
         		else{
         			console.log("invalid json");
