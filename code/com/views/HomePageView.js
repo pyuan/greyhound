@@ -21,6 +21,11 @@ define([
         initialize: function() 
         {
         	PageView.prototype.initialize.call(this); //calling base class initialize method
+        	
+        	var self = this;
+        	$(window).on("resize", function(){
+        		self._onResize();
+        	}).trigger("resize");
         },
 
         /**
@@ -60,7 +65,7 @@ define([
         		if(!$(this).hasClass("btn-inverse")){
         			self._showJSONEditView();
         		}
-        	}).trigger("click"); //default view
+        	}).trigger("click"); //show default view
         	
         	//click handler for preview button
         	var previewBtn = this.$el.find("#jsonEditControls #previewBtn");
@@ -96,47 +101,84 @@ define([
         	//use localstorage to persist user json input
         	var jsonForm = this.$el.find("#jsonForm");
         	$(jsonForm).garlic();
+        	$(jsonForm).submit(function(){
+        		$(getJSONBtn).trigger("click");
+        		return false;
+        	});
         	
             return this; //Maintains chainability
         },
         
         /**
+         * called when receiving JSON successfully
+         * @param data, JSON object
+         */
+        _onJSONSuccess: function(data)
+        {
+        	console.log("JSON Received:");
+			console.log(data);
+			this._showJSONEditView(JSON.stringify(data)); //just to populate the field with json
+			this._showJSONPreviewView();
+			this._hideJSONSpinner();
+			this._showJSONFeedbackMessage(Constants.ALERT_JSON_FETCH_SUCCESS, Constants.ALERT_TYPE_SUCCESS);
+			
+			//trigger click to store json
+			this.$el.find("#jsonEdit").trigger("change");
+			
+			//remove handler
+			delete window["jsonpCallback"];
+        },
+        
+        /**
+         * called when JSON request encounters an error
+         * @param jqXHR, request object
+         * @param textStatus, error status string
+         * @param method, string "jsonp" or "json", used to determine if need to make request again
+         * @param url, url to use if to make request again [opional]
+         */
+        _onJSONError: function(jqXHR, textStatus, method, url)
+        {
+        	//remove handler
+			delete window["jsonpCallback"];
+			
+			//make request again with json if jsonp resulted in error
+			if(method == "jsonp") 
+			{
+				this._getJSONFromURL(url, "json");
+				console.log("jsonp resulted in error, trying json now...")
+			}
+			else
+			{
+				var response = jqXHR.responseText;
+				this._showJSONEditView(response);
+				this._hideJSONSpinner();
+				this._showJSONFeedbackMessage(Constants.ALERT_JSON_REQUEST_FAILED, Constants.ALERT_TYPE_ERROR);
+				throw new Error("HomePageView._getJSONFromURL() error: " + textStatus);
+			}
+        },
+        
+        /**
          * get json from a url
          * @param url, string
+         * @param method, string either "jsonp" or "json"
          */
-        _getJSONFromURL: function(url) 
+        _getJSONFromURL: function(url, method) 
         {
         	if(url.indexOf("http") == -1){
         		url = "http://" + url;
+        	}
+        	
+        	if(!method){
+        		method = "jsonp";
         	}
         	
         	var self = this;
         	this._showJSONSpinner();
         	this._hideJSONAlert();
         	
-        	//setup the global JSONP handler
+        	//setup the global JSONP handler, only called on success
         	window["jsonpCallback"] = function(data){
-        		console.log("JSON Received:");
-				console.log(data);
-				self._showJSONEditView(JSON.stringify(data));
-				self._hideJSONSpinner();
-				self._showJSONFeedbackMessage(Constants.ALERT_JSON_FETCH_SUCCESS, Constants.ALERT_TYPE_SUCCESS);
-				
-				//trigger click to store json
-				self.$el.find("#jsonEdit").trigger("change");
-				
-				//remove handler
-				delete window["jsonpCallback"];
-        	};
-        	
-        	//handler if request returns with error
-        	var onError = function(jqXHR, textStatus)
-        	{
-        		var response = jqXHR.responseText;
-				self._showJSONEditView(response);
-				self._hideJSONSpinner();
-				self._showJSONFeedbackMessage(Constants.ALERT_JSON_REQUEST_FAILED, Constants.ALERT_TYPE_ERROR);
-				throw new Error("HomePageView._getJSONFromURL() error: " + textStatus);
+        		self._onJSONSuccess(data);
         	};
         	
         	$.ajax({
@@ -144,15 +186,18 @@ define([
 				url: url,
 				timeout: 2000,
 				cache: false,
-				dataType: "jsonp",
+				dataType: method,
 				jsonpCallback: "jsonpCallback",
+				success: function(data) {
+					self._onJSONSuccess(data);
+				},
 				complete: function(jqXHR, textStatus) {
 			        if (jqXHR.status == 0) {
-			        	onError(jqXHR, textStatus);
+			        	self._onJSONError(jqXHR, textStatus, method, url);
 			        }
 			    },
 				error: function(jqXHR, textStatus, errorThrown){
-					onError(jqXHR, textStatus);
+					self._onJSONError(jqXHR, textStatus, method, url);
 				}
 			});	
         },
@@ -292,6 +337,18 @@ define([
         {
         	var spinner = this.$el.find("#jsonEditControls .spinner");
         	$(spinner).stop().fadeOut("fast");
+        },
+        
+        /**
+         * on window resize
+         * @param none
+         */
+        _onResize: function()
+        {
+        	var form = this.$el.find("#jsonForm");
+        	var urlField = $(form).find("#jsonURL");
+        	var w = $(form).width() - 150;
+        	$(urlField).width(w);
         },
 
     });

@@ -61,7 +61,9 @@ define([
 						
 						//indicate that field is an array of instances of a class
 						var subClassName = this._getClassName(i);
-						cls[i] = [subClassName];
+						var classObject = {};
+						classObject[subClassName] = subClassName;
+						cls[i] = [classObject];
 					}
 				}
 			}
@@ -102,6 +104,11 @@ define([
 	JSONClassParser._getClassName = function(key)
 	{
 		var className = key[0].toUpperCase() + key.substring(1) + "Model";
+		
+		//if key is a number
+		if(!isNaN(key)) {
+			className = "Model" + key;
+		}
 		return className;
 	}
 

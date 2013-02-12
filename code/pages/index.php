@@ -35,10 +35,10 @@
 
         <form id="jsonForm" method="POST">
 	        <div class="well well-large">
-	        	<div id="jsonURLContainer" class="pull-left">
+	        	<div id="jsonURLContainer">
 	        		<div class="input-prepend input-append">
 	        			<span class="add-on"><i class="icon-globe"></i></span>
-	        			<input id="jsonURL" class="span7" type="text" placeholder="www.url.com"/>
+	        			<input id="jsonURL" type="text" placeholder="www.url.com"/>
 	        			<button id="getJSONBtn" class="btn" type="button">Fetch!</button>
 	    			</div>
 	        	</div>
